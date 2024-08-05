@@ -1,6 +1,4 @@
 import argparse
-import datetime
-from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
@@ -21,31 +19,20 @@ def main(url: str):
         )
         page = context.new_page()
         page.goto(url)
-
-        def to_filename(page_title: str):
-            words = page_title.split()
-            prefix = words[-1]
-            suffix = " ".join(words[:words.index("-")])
-            result = f"{prefix} {suffix}".replace(" ", "_").lower()
-            return f"{result}_{datetime.datetime.now()}.html"
             
         title = page.title()
         _logger.debug(f"page title: {title}")
 
         soup = BeautifulSoup(page.content(), "html.parser")
         _logger.debug(soup.prettify())
-
-        path = Path(to_filename(title))
-        with open(path, "w") as html:
-            _logger.info(f"writing html content to: {path.absolute()}")
-            html.write(soup.prettify())
-            #TODO: return file bytestream to support XCOM pull in downstream crawler task
+        
+        #TODO: return map of page to file bytestreams
 
         browser.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="zoopla-page-renderer", 
+        prog="html-renderer", 
         description="renders dynamic and static html content."
     )
 

@@ -2,30 +2,38 @@
 
 ARG PYTHON_VERSION=3.12.4
 
-FROM python:${PYTHON_VERSION}-bookworm AS base
+FROM python:${PYTHON_VERSION}-bookworm
 
-# create a non-privileged user that the app will run under.
-RUN groupadd -g 1001 airflow && \
-        useradd -m -u 1001 -g airflow -s /bin/bash crawler
+# create a non-privileged user and group to build the script bundle
+RUN groupadd -g 1001 automation && \
+        useradd -m -u 1001 -g automation -s /bin/bash agent
 
-WORKDIR /home/crawler
+WORKDIR /home/agent/html-renderer
 
-COPY requirements.txt requirements.txt
+# activate a virtual python environment
+RUN python -m venv venv && \
+        . ./venv/bin/activate
 
-RUN python -m pip install --upgrade pip && \
-        python -m pip install -r requirements.txt
+COPY --chown=agent:automation requirements.txt requirements.txt
 
-# install browser OS-dependencies
-RUN playwright install-deps
+RUN pip install --upgrade pip && \
+        pip install --no-cache-dir pyinstaller && \
+        pip install --no-cache-dir -r requirements.txt
 
-# switch to non-priveliged used to install chromium binary and run the script
-USER crawler
+# install OS browser dependencies and chromium binaries
+RUN PLAYWRIGHT_BROWSERS_PATH=0 playwright install --with-deps chromium
 
-# install chromium binaries in non-root user local cache
-RUN playwright install chromium
+COPY src src
 
-# copy source code into the container
-COPY ./app ./app
+# build the script bundle with chromium binaries
+RUN pyinstaller -n render-html -F ./src/__main__.py && \
+        cp ./dist/render-html /usr/local/bin/render-html
 
-# run the script
-CMD [ "python", "./app"]
+# create non-privelleged user to run the script
+RUN useradd -m -u 1002 -g automation -s /bin/bash headless
+
+WORKDIR /home/headless
+
+USER headless
+
+
