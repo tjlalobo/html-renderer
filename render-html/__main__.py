@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 _logger = logging.getLogger(f"html-renderer.{__name__}")
 
