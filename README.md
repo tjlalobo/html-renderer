@@ -1,6 +1,6 @@
 # HTML Renderer
 
-Infrastructure for Rendering dynamic (and, static) html content in a headless chromium environment.
+Infrastructure for rendering html content (dynamic and static) in a headless chromium environment.
 
 ## Building the project
 
@@ -14,10 +14,11 @@ $ docker build -t html-renderer .
 
 ## Usage
 
-Run the below command passing in the url of the html to render as an argument.
+Run the below command passing in the url of the html page to render as an argument.
 
 ```bash
-$ docker run -it --rm html-renderer render-html <url>
+$ docker run -it --rm html-renderer render-html \
+> https://toscrape.com/ > scraping_sandbox.html
 ```
 
 ## License
