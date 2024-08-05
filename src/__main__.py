@@ -17,6 +17,7 @@ def main(url: str):
         context = browser.new_context(
             user_agent="Chrome/51.0.2704.103 Safari/537.36" #TODO: configure
         )
+        
         page = context.new_page()
         page.goto(url)
             
